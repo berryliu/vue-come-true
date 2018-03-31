@@ -1,6 +1,6 @@
 import Watcher from './watcher'
 import observer from './observer'
-import Compiler from './compiler'
+import Compiler from './compiler1'
 
 class MVVM {
     constructor (options) {

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <input type="text" v-model="text">{{text}}
+</div>
+</body>
+<script>
+
+  /**
+   * @desc 编译文档片段
+   * @param node
+   * @param vm
+   */
+  function node2Fragment (node, vm) {
+    var flag = document.createDocumentFragment()
+    var child
+    // firstChild？ 所以是要个单根吗？
+    while (child = node.firstChild) {
+      // 编译节点
+      compile(child, vm)
+      // appendChild 会删除 node 上的 child
+      flag.appendChild(child)
+    }
+    return flag
+  }
+
+  /**
+   * @desc 编译节点，这里主要是将 data 的值设置在 nodeValue 上
+   * @param node
+   * @param vm
+   */
+  function compile (node, vm) {
+    var reg = /\{\{(.*)\}\}/
+    // 元素节点
+    if (node.nodeType === 1) {
+      var attr = node.attributes
+      for (var i = 0; i < attr.length; ++i) {
+        if (attr[ i ].nodeName === 'v-model') {
+          var name = attr[ i ].nodeValue
+          node.addEventListener('input', function (e) {
+            vm[ name ] = e.target.value
+          })
+          // 将 vm 上所属的 data 值赋给 节点，然后都挂在 vm 下了，这里要注意
+          node.value = vm[ name ]
+        }
+      }
+    } else if (node.nodeType === 3) {
+      if (reg.test(node.nodeValue)) {
+        // 这里直接存在了全局的 RegExp 上了？
+        var name = RegExp.$1
+        name = name.trim()
+        node.nodeValue = vm[ name ]
+        new Watcher(vm, node, name)
+      }
+
+    }
+
+  }
+
+  /**
+   * @desc 定义一个交互式的对象
+   * @param obj
+   * @param key
+   * @param val
+   */
+  function defineReactive (obj, key, val) {
+    var dep = new Dep()
+    Object.defineProperty(obj, key, {
+      get: function () {
+        // 直接返回对象里的存储值，设置引用？
+        if(Dep.target){
+          dep.addSub(Dep.target)
+        }
+        return val
+      },
+      set: function (newVal) {
+        if (newVal === val) {
+          return
+        }
+        // 设置对象里的值
+        val = newVal
+        dep.notify()
+      }
+    })
+  }
+
+  /**
+   * @desc 批量设置监听器
+   * @param obj
+   * @param vm
+   */
+  function observe (obj, vm) {
+    Object.keys(obj).forEach(function (key) {
+      defineReactive(vm, key, obj[ key ])
+    })
+  }
+
+  /**
+   * @desc 观察者
+   * @param vm
+   * @param node
+   * @param name
+   * @constructor
+   */
+  function Watcher (vm, node, name) {
+    Dep.target = this
+    this.vm = vm
+    this.node = node
+    this.name = name
+    this.value = ''
+
+    this.update()
+    Dep.target = null
+  }
+
+  Watcher.prototype = {
+    constructor: Watcher,
+    update: function () {
+      this.node.nodeValue = this.vm[ this.name ]
+    }
+  }
+
+  /**
+   * @发布者
+   * @constructor
+   */
+  function Dep () {
+    this.subs = []
+  }
+
+  Dep.prototype = {
+    constructor: Dep,
+    addSub: function (sub) {
+      this.subs.push(sub)
+    },
+    notify: function () {
+      this.subs.forEach(function (sub) {
+        sub.update()
+      })
+    }
+  }
+
+  function Vue (options) {
+    this.data = options.data
+    var id = options.el
+    var data = this.data
+    observe(data, this)
+    var root = document.getElementById(id)
+    var dom = node2Fragment(root, this)
+    root.appendChild(dom)
+  }
+
+  var vm = new Vue({
+    el: 'app',
+    data: {
+      text: 'hello world'
+    }
+  })
+
+
+</script>
+<script type="text/x-markdown">
+    # createDocumentFragment 的作用，生成虚拟文档片段，优化编辑节点，appendChild 删除原来节点
+    # RegExp 会保存结果在静态变量上？
+    # set 里的 val 设置直接改变了 vm 上的对象属性值
+    # 观察者模式
+
+
+
+
+
+
+
+
+
+</script>
+</html>

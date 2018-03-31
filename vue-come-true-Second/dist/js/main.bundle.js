@@ -68,819 +68,958 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dep__ = __webpack_require__(2);
 
-//watcher观察者对象
-class Watcher {
 
-    constructor(vm, expression, callback) {
-        this.callback = callback;
-        this.vm = vm;
-        // watch的数据属性
-        this.expression = expression;
-        this.callback = callback;
-        // watcher监听的属性的Id
-        this.depIds = {};
-        // 把值备份下，以便缓冲变化
-        this.oldValue = this.get();
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _dep = __webpack_require__(2);
+
+var _dep2 = _interopRequireDefault(_dep);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Watcher = function () {
+  /**
+   * @param vm  Vue 实例
+   * @param expression  data 的表达式，比如 a.b.c
+   * @param callback  更新后的回调
+   */
+  function Watcher(vm, expression, callback) {
+    _classCallCheck(this, Watcher);
+
+    this.vm = vm;
+    this.expression = expression;
+    this.callback = callback;
+
+    // 记录每个绑定该 watcher 的 dep
+    this.depIds = {};
+
+    // 初始化，并缓存对应的值
+    this.oldValue = this.get();
+  }
+
+  _createClass(Watcher, [{
+    key: 'addDep',
+    value: function addDep(dep) {
+      // 当前 data 的 dep
+      if (!this.depIds.hasOwnProperty(dep.id)) {
+        // 防止重复绑定
+        dep.addSub(this);
+        this.depIds[dep.id] = dep;
+      }
     }
-    //更新本node的视图
-    update () {
-        console.log("subs开始更新")
-        let newValue = this.get();
-        console.log(newValue)
-        console.log(this.oldValue)
-        let oldValue = this.oldValue;
-        if (newValue !== this.oldValue) {
-            // 更新备份，准备下次对比
-            this.oldValue = newValue;
-            // 执行回调更新视图
-            console.log("开始执行回掉函数")
-            console.log(this.callback)
-            this.callback.call(this.vm, newValue, oldValue);
-        }
-        cosole.log("subs更新结束")
-    }
-    //观察某个属性
-    addDep (dep) {
-        //
-        if (!this.depIds.hasOwnProperty(dep.id)) {
-            // 添加订阅者
-            dep.addSub(this);
-            // 该属性的依赖列表
-            this.depIds[dep.id] = dep;
-        }
-    }
-    //取得node的expresstion在vm中的值
-    get () {
-        __WEBPACK_IMPORTED_MODULE_0__dep__["a" /* default */].target = this;
-        // 求值的过程会触发vm属性值的getter
-        let value = this.getVMVal();
-        // 访问完了，置空
-        __WEBPACK_IMPORTED_MODULE_0__dep__["a" /* default */].target = null;
-        return value;
+  }, {
+    key: 'get',
+    value: function get() {
+      _dep2.default.target = this; // 当前 watcher 指向该 watcher
+      var value = this.getVMVal(); // 这里会触发 vm 上指定 data 的 get 方法，将该 watcher 绑定到 data 的 dep 上
+      _dep2.default.target = null;
+
+      return value;
     }
 
-    getVMVal () {
-        let expression = this.expression.split('.');
-        let value = this.vm;
-        expression.forEach(function (curVal) {
-            // 这里取值的过程，会调用到每一个数据的get，根据getter里面的闭包
-            // 从而访问到数据的dep,调用dep.depend
-            // 属性dep.depend, 进一步调用到Watch的addDep，让watcher添加进去
-            value = value[curVal];
-        });
-        return value;
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Watcher;
+    // 去 实例中里 data 取值
 
+  }, {
+    key: 'getVMVal',
+    value: function getVMVal() {
+      var expression = this.expression.split('.');
+      var value = this.vm; // 直接从实例上取，做了映射关系
+
+      expression.forEach(function (curVal) {
+        return value = value[curVal];
+      });
+      return value;
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      var newValue = this.get(); // 这里又触发了一次 target 设置？
+      var oldValue = this.oldValue;
+
+      if (newValue !== this.oldValue) {
+        this.oldValue = newValue;
+        this.callback.call(this.vm, newValue, oldValue);
+      }
+    }
+  }]);
+
+  return Watcher;
+}();
+
+exports.default = Watcher;
 
 /***/ }),
 /* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = observer;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dep__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__array__ = __webpack_require__(6);
 
 
-//arrayMethods是劫持了数组方法的对象
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+// 覆盖后的方法
 
 
-//原型继承
-function protoAugment(target, src) {
-    console.log("1")
-    target.__proto__ = src;
-}
-//赋值继承
-function copyAugment(target, src, keys) {
-    for (let i = 0; i < keys.length; i++) {
-        //fixbug
-        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__["a" /* def */])(target, keys[i], src[keys[i]]);
-    }
-}
-//注意：obeserver只监听对象。
+exports.default = observer;
+
+var _dep = __webpack_require__(2);
+
+var _dep2 = _interopRequireDefault(_dep);
+
+var _util = __webpack_require__(3);
+
+var _array = __webpack_require__(6);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// 监听数据
 function observer(data) {
-    //如果该数据为空或者该数据不为对象
-    if (!data || typeof data !== 'object') {
-        return;
-        //如果该对象已经被监听
-    } else if (data.hasOwnProperty("__ob__") && data["__ob__"] instanceof Observer) {
-        return;
-    }
-    return new Observer(data);
+  if (!data || (typeof data === 'undefined' ? 'undefined' : _typeof(data)) !== 'object') {
+    return;
+  } else if (data.hasOwnProperty('__ob__') && data['__ob__'] instanceof Observer) {
+    // 绑定过了
+    return;
+  }
+
+  return new Observer(data);
 }
 
-class Observer {
-    constructor(data) {
-        //这里的dep作用，一开始也比较困惑，后来觉得应该是给数组用的主题，
-        this.dep = new __WEBPACK_IMPORTED_MODULE_0__dep__["a" /* default */]();
-        // 给每个数据一个指向Observer实例的引用，array.js会用到
-        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__["a" /* def */])(data, "__ob__", this);
-        this.data = data;
-        //vm.data中如果存在数组，会在后面的递归中进入下面if这个流程
-        if (Array.isArray(data)) {
-            //【？？？】如果data有原型？这里data已经是数组了当然有原型。。不太明白这里什么意思
-            const argment = data.__proto__ ? protoAugment : copyAugment;
-            // 开始覆盖data数组的原生方法
-            argment(data, __WEBPACK_IMPORTED_MODULE_2__array__["a" /* arrayMethods */], Object.keys(__WEBPACK_IMPORTED_MODULE_2__array__["a" /* arrayMethods */]));
-            // 对数组元素遍历下，有元素可能是对象
-            this.observerArray(data);
-        } else {
-            //开始遍历所有data对象的所有属性
-            this.walk(data);
-        }
+// 原型继承
+function protoAugment(target, src) {
+  target.__proto__ = src;
+}
 
+function copyAugment(target, src, keys) {
+  keys.forEach(function (key) {
+    return (0, _util.def)(target, src, src[key]);
+  });
+}
+
+var Observer = function () {
+  function Observer(data) {
+    _classCallCheck(this, Observer);
+
+    this.dep = new _dep2.default(); // 不知道为啥
+
+    (0, _util.def)(data, '__ob__', this); // 给 data 一个该 observer 的引用
+
+    this.data = data;
+
+    if (Array.isArray(data)) {
+      // 数组处理复杂的多
+      var argment = data.__proto__ ? protoAugment : copyAugment;
+
+      // 覆盖数组方法更新数据
+      argment(data, _array.arrayMethods, Object.keys(_array.arrayMethods));
+
+      this.observerArray(data); // 对数组元素遍历，可能是对象
+    } else {
+      this.walk(data);
     }
+  }
 
-    walk(data) {
-        let self = this;
-        Object.keys(this.data).forEach(function (key) {
-            self.defineReactice(data, key, data[key]);
-        });
+  _createClass(Observer, [{
+    key: 'walk',
+    value: function walk(data) {
+      var _this = this;
+
+      Object.keys(this.data).forEach(function (key) {
+        _this.defineReactive(data, key, data[key]);
+      });
     }
-
-    observerArray(items) {
-        for (let i = 0; i < items.length; i++) {
-            // 数组的元素是对象就监听
-            observer(items[i]);
-        }
+  }, {
+    key: 'observerArray',
+    value: function observerArray(items) {
+      items.forEach(function (item) {
+        return observer(item);
+      });
     }
+  }, {
+    key: 'defineReactive',
+    value: function defineReactive(data, key, value) {
+      var dep = new _dep2.default(); // 给每个 data 值都设定一个 dep，用来管理自己的 watcher
+      var descriptor = Object.getOwnPropertyDescriptor(data, key);
 
-    defineReactice(data, key, value) {
-        // dep即我们之前提到的主题对象，它既可以添加观察者Watcher，又可以发布事件让所有Watcher更新视图，每个属性都有一个dep
-        //注意区分这里的dep和Observer对象里的this.dep
-        let dep = new __WEBPACK_IMPORTED_MODULE_0__dep__["a" /* default */](),
-            descriptor = Object.getOwnPropertyDescriptor(data, key);
-        //如果已经存在访问器且访问器接口的configurable属性为false则直接返回
-        if (descriptor && !descriptor.configurable) {
-            return;
-        }
-        //递归监听，value是对象会返回一个new Observer(value)，否则childObserver为undifined
-        let childObserver = observer(value);
-        Object.defineProperty(data, key, {
-            enumerable: true,
-            configurable: false,
-            get: function () {
-                //get函数会在node编译时初始化赋值时触发，此时Dep.target会指向那个watcher观察者
-                if (__WEBPACK_IMPORTED_MODULE_0__dep__["a" /* default */].target) {
-                    // 为这个属性添加观察者watcher
-                    dep.depend();
-                    //如果存在子数组（这里认为对子对象来说没有作用），则为子数组添加观察者，当数组使用方法时，数组的dep发布事件并更新视图
-                    if (childObserver) {
-                        childObserver.dep.depend();
-                    }
-                }
-                return value;
-            },
-            set: function (newValue) {
-                if (newValue == value) {
-                    return;
-                }
-                if (typeof newValue === 'object') {
-                    //观察新值
-                    observer(newValue);
-                }
-                value = newValue;
-                // 告诉所有订阅了这个属性的Watcher，数据更新了！
-                dep.notify();
+      if (descriptor && !descriptor.configurable) {
+        // 有访问器，且访问器不能修改
+        return;
+      }
+
+      var childObserver = observer(value); // 子对象继续监听，不是对象会返回 undefined
+
+      Object.defineProperty(data, key, {
+        enumerable: true,
+        configurable: true,
+        get: function get() {
+          if (_dep2.default.target) {
+            // 当前 watcher，在编译时添加 watcher 初始化时触发，见 watcher
+            dep.depend();
+
+            if (childObserver) {
+              // 子对象也需要添加父数据的 watcher，树状遍历更新？
+              childObserver.dep.depend();
             }
-        });
+          }
+          return value;
+        },
+        set: function set(newValue) {
+          if (newValue == value) {
+            return;
+          }
+          if ((typeof newValue === 'undefined' ? 'undefined' : _typeof(newValue)) === 'object') {
+            observer(newValue);
+          }
+          value = newValue;
+
+          // 通知更新
+          dep.notify();
+        }
+      });
     }
-}
+  }]);
 
-
+  return Observer;
+}();
 
 /***/ }),
 /* 2 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__watcher__ = __webpack_require__(0);
 
 
-let uid = 0;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-class Dep {
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-    constructor () {
-        this.id = uid++;
-        this.subs = [];
+var _watcher = __webpack_require__(0);
+
+var _watcher2 = _interopRequireDefault(_watcher);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var uid = 0;
+
+var Dep = function () {
+  // 当前 watcher，全局的
+
+  function Dep() {
+    _classCallCheck(this, Dep);
+
+    this.id = uid++; // 每一个 data 有一个通知者
+    this.subs = [];
+  }
+
+  _createClass(Dep, [{
+    key: 'addSub',
+    value: function addSub(sub) {
+      // 添加 watcher
+      this.subs.push(sub);
     }
-
-    addSub (sub) {
-        this.subs.push(sub);
+  }, {
+    key: 'removeSub',
+    value: function removeSub(sub) {
+      // 删除 watcher
+      var index = this.subs.indexOf(sub);
+      index !== -1 && this.subs.splice(index, 1);
     }
-
-    removeSub (sub) {
-        let index = this.subs.indexOf(sub);
-        if (index != -1) {
-            this.subs.splice(index, 1);
-        }
+  }, {
+    key: 'notify',
+    value: function notify() {
+      // 通知所有 watch 更新
+      this.subs.forEach(function (sub) {
+        return sub.update();
+      });
     }
-
-    depend () {
-        Dep.target.addDep(this);
+  }, {
+    key: 'depend',
+    value: function depend() {
+      // 将 当前 添加到该通知者（调用当前观察者的 addDep 方法，从而间接调用通知者的 addSub 方法添加观察者。。。为什么要这么绕？）
+      Dep.target.addDep(this); // this 为当前 dep
     }
+  }]);
 
-    notify () {
-        this.subs.forEach(sub => console.log("aaa"))
-        // 订阅者收到更新，然后通知订阅者watcher去更新视图
-        this.subs.forEach(sub => sub.update());
-        console.log("subs 更新完成")
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Dep;
+  return Dep;
+}();
 
+exports.default = Dep;
 
 /***/ }),
 /* 3 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = def;
-/* unused harmony export debounce */
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.def = def;
+exports.debounce = debounce;
+// 定义对象，可写默认属性值，可设置属性描述，value 可以是个方法，比如数组方法
 function def(obj, key, value, enumerable) {
-    Object.defineProperty(obj, key, {
-        value: value,
-        writeable: true,
-        configurable: true,
-        enumerable: !!enumerable
-    });
+  Object.defineProperty(obj, key, {
+    value: value,
+    writable: true,
+    configurable: true,
+    enumerable: !!enumerable
+  });
 }
 
+// 去抖动函数，immediate 表示是时间区间开始调用，还是之后
 function debounce(func, wait, immediate) {
   var timeout = null;
-  
+
   return function () {
-    var delay = function () {
-      timeout = null;
-      // 需要判断下，否则对于immediate为true的情况会触发两次
+    var delay = function delay() {
       if (!immediate) {
+        // 不是立即触发才调用
         func.apply(this, arguments);
       }
-    }
-    var callnow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(delay ,wait);
-    // 第一次触发事件立即执行
-    console.log(callnow);
-    if (callnow) {
-      func.apply(this, arguments);
-    }
-  }
-}
+    };
 
-/*
-export function computeExpression(vm, exp) {
-    try {
-        with (vm) {
-            return eval(exp);
-        }
-    } catch (e) {
-        console.error('ERROR', e);
-    }
-}*/
+    var callnow = immediate && !timeout; // 不存在 timeout（第一次），并且立即触发
+    clearTimeout(timeout);
+    timeout = setTimeout(delay, wait);
+
+    callnow && func.apply(this, arguments);
+  };
+}
 
 /***/ }),
 /* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__watcher__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observer__ = __webpack_require__(1);
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-const tagRE = /\{\{\{(.*?)\}\}\}|\{\{(.*?)\}\}/g,
-    htmlRE = /^\{\{\{(.*)\}\}\}$/,
-    paramsRE = /\((.+)\)/g,
-    stringRE = /\'(.*)\'/g;
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-class Compiler {
+var _watcher = __webpack_require__(0);
 
-    constructor(el, vm) {
-        this.$vm = vm;
-        this.$el = this.isElementNode(el) ? el : document.querySelector(el);
+var _watcher2 = _interopRequireDefault(_watcher);
 
-        if (this.$el) {
-            //转换原始node并将其加入一个新的片段（原始node会被删除）
-            this.$fragment = this.createFragment(this.$el);
-            //编译这个片段
-            this.compileElement(this.$fragment);
-            this.$el.appendChild(this.$fragment);
+var _observer = __webpack_require__(1);
+
+var _observer2 = _interopRequireDefault(_observer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var tagRE = /\{\{\{(.*)\}\}\}|\{\{(.*)\}\}/g; // 文本/html 的差值符号
+var htmlRE = /^\{\{\{(.*)\}\}\}$/; // html 的差值符号
+var textRE = /\{\{(.*)\}\}/g; // text 的差值符号
+var paramsRE = /\((.+)\)/g; // 事件方法的参数对象符号
+var stringRE = /\'(.*)\'/g; // 事件方法的字符串参数符号
+
+var Compiler = function () {
+  function Compiler(el, vm) {
+    _classCallCheck(this, Compiler);
+
+    this.$vm = vm;
+    this.$el = this.isElementNode(el) ? el : document.querySelector(el);
+    if (this.$el) {
+      // 说明 compile 的时候才绑定解析节点
+      // 将 原始节点 加入编译片段，在内存里编译节点
+      this.$fragment = this.createFragment(this.$el);
+
+      this.compileElement(this.$fragment);
+      this.$el.appendChild(this.$fragment);
+    }
+  }
+
+  _createClass(Compiler, [{
+    key: 'createFragment',
+    value: function createFragment(el) {
+      var fragment = document.createDocumentFragment(); // 创建虚拟节点片段
+      var child = void 0;
+
+      while (child = el.firstChild) {
+        // 添加子片段
+        fragment.appendChild(child);
+      }
+      return fragment;
+    }
+  }, {
+    key: 'compileElement',
+    value: function compileElement(el) {
+      var _this = this;
+
+      // 逐个编译节点片段
+      var childNodes = el.childNodes;
+
+      [].slice.call(childNodes).forEach(function (node) {
+        var text = node.textContent;
+
+        if (_this.isElementNode(node)) {
+          // 元素节点编译
+          _this.compileNodeAttr(node);
+        } else if (_this.isTextNode(node) && textRE.test(text)) {
+          // 文本节点编译
+          _this.compileText(node);
         }
+      });
     }
+  }, {
+    key: 'compileNodeAttr',
+    value: function compileNodeAttr(node) {
+      var _this2 = this;
 
-    createFragment(el) {
-        var fragment = document.createDocumentFragment(),
-            child;
-        //遍历原始node子节点，并删除原始node结点（注意：这里只是遍历子结点，在compileNodeAttr函数中会递归继续遍历子结点的子节点）
-        while (child = el.firstChild) {
-            fragment.appendChild(child);
+      // 编译节点属性
+      var nodeAttrs = node.attributes;
+      var lazyCompiler = void 0,
+          lazyExp = void 0;
+
+      [].slice.call(nodeAttrs).forEach(function (attr) {
+        var attrName = attr.name;
+        if (_this2.isDirective(attrName)) {
+          var expression = attr.value;
+          var directive = attrName.substring(2); // 取出 v- 后面的字符串
+
+          if (directive === 'for') {
+            // for 循环 稍后处理
+            lazyCompiler = directive;
+            lazyExp = expression;
+          } else if (_this2.isEventDirective(directive)) {
+            // 事件处理
+            directiveUtil.addEvent(node, _this2.$vm, expression, directive);
+          } else {
+            // 其他的指令
+            directiveUtil[directive] && directiveUtil[directive](node, _this2.$vm, expression);
+          }
+
+          // 移除 vue 的指令
+          node.removeAttribute(attrName);
         }
+      });
 
-        return fragment;
+      if (lazyCompiler === 'for') {
+        // for 循环里没有子节点要处理
+        directiveUtil[lazyCompiler] && directiveUtil[lazyCompiler](node, this.$vm, lazyExp);
+      } else if (node.childNodes && node.childNodes.length) {
+        // 继续处理子节点
+        this.compileElement(node);
+      }
     }
+  }, {
+    key: 'compileText',
+    value: function compileText(node) {
+      var _this3 = this;
 
-    compileElement(el) {
-        let childNodes = el.childNodes,
-            self = this;
+      // 编译文本节点
+      var tokens = this.parseText(node.wholeText); // wholeText 取出所有相邻文本节点，忽略元素节点
+      var fragment = document.createDocumentFragment();
 
-        [].slice.call(childNodes).forEach(function (node) {
-            var text = node.textContent;
-            var reg = /\{\{(.*)\}\}/g;
-            //如果node类型为元素（具体查阅node的nodetype属性）
-            if (self.isElementNode(node)) {
-                self.compileNodeAttr(node);
-            //如果node类型为文本，且存在{{data}}文本
-            } else if (self.isTextNode(node) && reg.test(text)) {
-                self.compileText(node);
-            }
-        });
-    }
+      tokens.forEach(function (token) {
+        var el = void 0;
 
-    compileNodeAttr(node) {
-        let nodeAttrs = node.attributes,
-            self = this,
-            lazyComplier,
-            lazyExp;
+        if (token.tag) {
+          if (token.html) {
+            // 响应式 html 节点
+            el = document.createDocumentFragment();
 
-        [].slice.call(nodeAttrs).forEach(function (attr) {
-            let attrName = attr.name;
-            if (self.isDirective(attrName)) {
-                // expression就是属性的值，例如v-if="data"中的data
-                let expression = attr.value;
-                // directicve就是指令名称，例如v-if="data"中的if
-                let directive = attrName.substring(2);
-                //先判断for，再判断on,最后判断其他指令
-                if (directive === 'for') {
-                    // 
-                    lazyComplier = directive;
-                    lazyExp = expression;
-                } else if (self.isEventDirective(directive)) {
-                    // 为该node绑定事件
-                    directiveUtil.addEvent(node, self.$vm, directive, expression);
-                } else {
-                    //为该node解析指令(不包含for)
-                    directiveUtil[directive] && directiveUtil[directive](node, self.$vm, expression);
-                }
-                // 处理完指令后将其移出（我们F12查看元素是没有指令的）
-                node.removeAttribute(attrName);
-            }
-        });
-        //for指令在这里处理（因为for指令对应的node不需要处理子节点）
-        if (lazyComplier === 'for') {
-            directiveUtil[lazyComplier] && directiveUtil[lazyComplier](node, this.$vm, lazyExp);
-        } else if (node.childNodes && node.childNodes.length) {
-            self.compileElement(node);
+            // fragment 没有 parent，插入文档树时是把子孙节点插进去
+            // {{{}}} 方式添加 html 时解析的是个 空节点，所以要记录 parentNode 以便解析插入，不像 v-html
+            el.$parent = node.parentNode;
+
+            el.$oncetime = true; // 初始化编译 html 时需要
+            directiveUtil.html(el, _this3.$vm, token.value);
+          } else {
+            // 响应式的文本节点
+            el = document.createTextNode(" ");
+            directiveUtil.text(el, _this3.$vm, token.value);
+          }
+        } else {
+          el = document.createTextNode(token.value);
         }
+        el && fragment.appendChild(el);
+      });
+      node.parentNode.replaceChild(fragment, node);
     }
+  }, {
+    key: 'parseText',
+    value: function parseText(text) {
+      // 解析文本，生成数据对象
+      if (tagRE.test(text)) {
+        var tokens = [];
+        var lastIndex = tagRE.lastIndex = 0; // RegExp.exec() 和 RegExp.test() 找到的 lastIndex 会作为静态变量记录下来，要有 g
+        var match = void 0,
+            index = void 0,
+            html = void 0,
+            value = void 0;
 
-    compileText(node) {
-        //wholeText是文本node的一个属性
-        const tokens = this.parseText(node.wholeText);
-        let fragment = document.createDocumentFragment();
-        tokens.forEach(token => {
-            let el;
-            //如果该文本node含有需要解析的文本
-            if (token.tag) {
-                // 该文本含有需要解析的html
-                if (token.html) {
-                    // html 解析 创建空文档
-                    el = document.createDocumentFragment();
-                    el.$parent = node.parentNode;
-                    //
-                    el.$oncetime = true;
-                    directiveUtil.html(el, this.$vm, token.value);
-
-                } else {
-                    // 新的响应式文本节点
-                    el = document.createTextNode(" ");
-                    directiveUtil.text(el, this.$vm, token.value);
-                }
-            } else {
-                el = document.createTextNode(token.value);
-            }
-            //
-            el && fragment.appendChild(el);
-        });
-        node.parentNode.replaceChild(fragment, node);
-    }
-
-    parseText(text) {
-        //如果不存在需要解析的文本，直接返回
-        if (!tagRE.test(text)) {
-            return;
-        }
-        const tokens = [];
-        let lastIndex = tagRE.lastIndex = 0;
-        let match, index, html, value;
-        //不太懂exec用法的可以去看一下文档，下面是一个exec的测试用例，console一下你就明白了
-        // const tagRE = /\{\{\{(.*?)\}\}\}|\{\{(.*?)\}\}/g,
-        // var text="1122{{{3344}}}"
-        // var match = tagRE.exec(text)
-        // console.log(match)
         while (match = tagRE.exec(text)) {
-            //取到匹配到{{}}或者{{{}}}在文本中的位置
-            index = match.index;
-            // 先提取{{}} 或者 {{{}}} 之前的文本
-            if (index > lastIndex) {
-                tokens.push({
-                    value: text.slice(lastIndex, index)
-                });
-            }
-            // 是按html解析还是按text解析
-            html = htmlRE.test(match[0]);
-            value = html ? match[1] : match[2];
+          index = match.index;
+
+          if (index > lastIndex) {
+            // 提取出匹配前的文本
             tokens.push({
-                value: value,
-                tag: true,
-                html: html
+              value: text.slice(lastIndex, index)
             });
-            lastIndex = index + match[0].length;
+          }
+
+          html = htmlRE.test(match[0]); // 测试下是 html 还是 text
+          value = html ? match[1] : match[2];
+          tokens.push({
+            value: value,
+            html: html,
+            tag: true
+          });
+          lastIndex = index + match[0].length; // 重置下个起始节点
         }
-        //提取剩余文本
         if (lastIndex < text.length) {
-            tokens.push({
-                value: text.slice(lastIndex)
-            });
+          // 提取剩余文本
+          tokens.push({
+            value: text.slice(lastIndex)
+          });
         }
         return tokens;
+      }
     }
 
-    isDirective(attr) {
-        return attr.indexOf('v-') === 0;
+    // 是否是元素节点
+
+  }, {
+    key: 'isElementNode',
+    value: function isElementNode(node) {
+      return node.nodeType === 1;
     }
 
-    isEventDirective(dir) {
-        return dir.indexOf('on') === 0;
+    // 是否是文本节点
+
+  }, {
+    key: 'isTextNode',
+    value: function isTextNode(node) {
+      return node.nodeType === 3;
     }
 
-    isElementNode(node) {
-        return node.nodeType === 1;
+    // 是否是 vue 指令
+
+  }, {
+    key: 'isDirective',
+    value: function isDirective(attr) {
+      return attr.indexOf('v-') === 0;
     }
 
-    isTextNode(node) {
-        return node.nodeType === 3;
+    // 是否是 vue 事件
+
+  }, {
+    key: 'isEventDirective',
+    value: function isEventDirective(attr) {
+      return attr.indexOf('on') === 0;
     }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Compiler;
+  }]);
+
+  return Compiler;
+}();
+
+// 指令解析
 
 
-//一个解析不同指令的对象
-const directiveUtil = {
-    text: function (node, vm, expression) {
-        this.bind(node, vm, expression, 'text');
-    },
+exports.default = Compiler;
+var directiveUtil = {
+  text: function text(node, vm, expression) {
+    // 解析文本指令
+    this.bind(node, vm, expression, 'text');
+  },
+  html: function html(node, vm, expression) {
+    // 解析 html 指令
+    this.bind(node, vm, expression, 'html');
+  },
+  class: function _class(node, vm, expression) {
+    // 解析 html 指令
+    this.bind(node, vm, expression, 'class');
+  },
+  for: function _for(node, vm, expression) {
+    // 解析 for 指令
+    var forExpression = expression.split('in'),
+        // item in data.list
+    itemName = forExpression[0].replace(/\s/g, ''),
+        // 默认 'item'
+    arrayName = forExpression[1].replace(/\s/g, '').split('.'),
+        parentNode = node.parentNode,
+        startNode = document.createTextNode(''),
+        endNode = document.createTextNode(''),
+        range = document.createRange(); // 这个 range 只是用来删除文档的
 
-    html: function (node, vm, expression) {
-        this.bind(node, vm, expression, 'html');
-    },
+    // 把 node 替换成头尾两个空节点，便于待会插入。node 此时只是个占位，需要全部替换掉
+    parentNode.replaceChild(endNode, node);
+    parentNode.insertBefore(startNode, endNode);
 
-    class: function (node, vm, expression) {
-        this.bind(node, vm, expression, 'class');
-    },
+    var value = vm; // 这里不能用 _getVMVal，因为用了 JSON.string
+    arrayName.forEach(function (val) {
+      value = value[val];
+    });
 
-    for: function (node, vm, expression) {
-        let itemName = expression.split('in')[0].replace(/\s/g, ''),
-            //这里split('.')的意思：例如item in data.data1.data2,取出data,data1,data2
-            arrayName = expression.split('in')[1].replace(/\s/g, '').split('.'),
-            parentNode = node.parentNode,
-            startNode = document.createTextNode(''),
-            endNode = document.createTextNode(''),
-            range = document.createRange();
+    value.forEach(function (item, index) {
+      // 创建节点
+      var cloneNode = node.cloneNode(true); // 深度克隆
+      parentNode.insertBefore(cloneNode, endNode); // 插入节点
 
-        // 替换原始node
-        parentNode.replaceChild(endNode, node);
-        parentNode.insertBefore(startNode, endNode);
+      // 继承 vm，附上 '$index' 和 'item' 两个参数
+      var forVm = Object.create(vm);
+      forVm.$index = index;
+      forVm[itemName] = item;
 
-        let value = vm;
-        //得到数组的值
-        arrayName.forEach(function (curVal) {
-            value = value[curVal];
-        });
+      new Compiler(cloneNode, forVm);
+    });
 
-        // 有多少数组就创造多少节点
-        value.forEach(function (item, index) {
-            let cloneNode = node.cloneNode(true);
-            parentNode.insertBefore(cloneNode, endNode);
-            //forvm原型继承vm，并且增加两个属性
-            let forVm = Object.create(vm);
-            // 增加$index下标
-            forVm.$index = index;
-            // 绑定item作用域
-            forVm[itemName] = item;
-            // 继续递归编译每个结点
-            new Compiler(cloneNode, forVm);
-        });
+    new _watcher2.default(vm, arrayName + '.length', function (newValue, oldValue) {
+      // data.list.length 新旧值没用？只用 value 的引用
+      // 清掉 content
+      range.setStart(startNode, 0);
+      range.setEnd(endNode, 0);
+      range.deleteContents();
 
-        new __WEBPACK_IMPORTED_MODULE_0__watcher__["a" /* default */](vm, arrayName + ".length", function (newValue, oldValue) {
-            range.setStart(startNode, 0);
-            range.setEnd(endNode, 0);
-            range.deleteContents();
-            value.forEach((item, index) => {
-                let cloneNode = node.cloneNode(true);
-                parentNode.insertBefore(cloneNode, endNode);
-                let forVm = Object.create(this);
-                // 增加$index下标
-                forVm.$index = index;
-                // 绑定item作用域
-                forVm[itemName] = item;
-                // 继续编译cloneNode
-                new Compiler(cloneNode, forVm);
-            });
-        });
+      value.forEach(function (item, index) {
+        // 这里还是用 value，引用
+        var cloneNode = node.cloneNode(true); // 深度克隆
+        parentNode.insertBefore(cloneNode, endNode); // 插入节点
 
-    },
+        // 继承 vm，附上 '$index' 和 'item' 两个参数
+        var forVm = Object.create(vm);
+        forVm.$index = index;
+        forVm[itemName] = item;
+        new Compiler(cloneNode, forVm);
+      });
+    });
+  },
+  model: function model(node, vm, expression) {
+    var _this4 = this;
 
-    model: function (node, vm, expression) {
-        this.bind(node, vm, expression, 'model');
+    this.bind(node, vm, expression, 'model'); // 这里还是 data -> view
 
-        // 对于model做双向绑定
-        let value = this._getVMVal(vm, expression);
+    var value = this._getVMVal(vm, expression); // 拿到的都是引用，待会会设置
 
-        // compositon是针对中文输入的优化
-        let composing = false;
+    var composing = false; // 中文输入法的优化，composition 与 input 协作
 
-        node.addEventListener('compositionstart', () => {
-            composing = true;
-        }, false);
+    node.addEventListener('compositionstart', function () {
+      composing = true;
+    }, false);
 
-        node.addEventListener('compositionend', event => {
-            composing = false;
-            if (value !== event.target.value) {
-                this._setVMVal(vm, expression, event.target.value);
-            }
-        }, false);
+    node.addEventListener('compositionend', function (e) {
+      composing = false;
+      var eValue = e.target.value;
+      if (value !== eValue) {
+        _this4._setVMVal(vm, expression, eValue);
+      }
+    });
 
-        node.addEventListener('input', event => {
-            if (!composing && value !== event.target.value) {
-                this._setVMVal(vm, expression, event.target.value);
-            }
-        }, false);
-    },
+    node.addEventListener('input', function (e) {
+      var eValue = e.target.value;
+      if (!composing && value !== eValue) {
+        _this4._setVMVal(vm, expression, eValue);
+      }
+    });
+  },
+  bind: function bind(node, vm, expression, directive) {
+    var updateFn = updater[directive + 'Updater']; // 指令更新函数
 
-    bind: function (node, vm, expression, directive) {
-        //得到指令对应的更新函数
-        var updaterFn = updater[directive + 'Updater'];
-        // 获取vm中的expression的值，会触发属性值的get函数
-        let value = this._getVMVal(vm, expression);
-        //给node更新值（不同指令不同的更新函数）
-        updaterFn && updaterFn(node, value);
-        // 监听该数据的值，给订阅者Watcher传入更新视图的回调函数
-        new __WEBPACK_IMPORTED_MODULE_0__watcher__["a" /* default */](vm, expression, function (newValue, oldValue) {
-            updaterFn && updaterFn(node, newValue, oldValue);
-        });
-    },
+    var value = this._getVMVal(vm, expression);
+    updateFn && updateFn(node, value); // 更新值
 
-    addEvent: function (node, vm, directive, expression) {
-        //用:将v-on:click中的on和click分割成数组
-        let eventType = directive.split(':');
-        //在vm实例中匹配对应的method函数
-        let fn = vm.$options.methods && vm.$options.methods[expression];
+    // 这里绑定 watcher，只有 className 才需要 oldValue
+    new _watcher2.default(vm, expression, function (newValue, oldValue) {
+      updateFn && updateFn(node, value, oldValue);
+    });
+  },
+  addEvent: function addEvent(node, vm, expression, directive) {
+    var _this5 = this;
 
-        if (eventType[1] && typeof fn === 'function') {
-            node.addEventListener(eventType[1], fn.bind(vm), false);
+    var eventType = directive.split(':'); // v-on:click
+    var fn = vm.$options.methods && vm.$options.methods[expression]; // 事件回调方法
+
+    if (eventType[1] && typeof fn === 'function') {
+      // 直接绑定方法的
+      node.addEventListener(eventType[1], fn.bind(vm), false);
+    } else {
+      // 找不到方法名的可能是带参数的
+      var match = paramsRE.exec(expression),
+          fnName = expression.replace(match[0], ''),
+          // 替换掉参数
+      paramNames = match[1].split(','),
+          params = [];
+
+      fn = vm.$options.methods[fnName];
+
+      paramNames.forEach(function (name) {
+        name = name.trim();
+        var stringMatch = stringRE.exec(name); // 参数有可能是字符串，有可能是变量
+
+        if (stringMatch) {
+          params.push(stringMatch[1]);
         } else {
-            //处理带参数的method,对这里match的值不太懂的去看一下exec方法
-            let match = paramsRE.exec(expression),
-                //得到剔除参数后的函数名称
-                fnName = expression.replace(match[0], ''),
-                //参数数组
-                paramNames = match[1].split(','),
-                params = [];
-
-            fn = vm.$options.methods[fnName];
-            // 解析参数中的字符串参数以及data属性值的参数
-            for (let i = 0; i < paramNames.length; i++) {
-                let name = paramNames[i].trim(),
-                    stringMatch = stringRE.exec(name);
-                if (stringMatch) {
-                    // 字符串常量
-                    params.push(stringMatch[1]);
-                } else {
-                    // vm中变量
-                    params.push(vm[name]);
-                }
-            }
-            node.addEventListener(eventType[1], function () {
-                fn.apply(vm, params);
-            }, false);
+          // params.push(vm[name]) // 直接取值了
+          params.push(_this5._getVMVal(vm, name));
         }
-    },
+      });
 
-    _getVMVal: function (vm, expression) {
-        expression = expression.trim();
-        let value = vm;
-        expression = expression.split('.');
-        expression.forEach((key) => {
-            if (value.hasOwnProperty(key)) {
-                value = value[key];
-            } else {
-                throw new Error("can not find the property: " + key);
-            }
-
-        });
-
-        if (typeof value === 'object') {
-            return JSON.stringify(value);
-        } else {
-            return value;
-        }
-    },
-
-    _setVMVal: function (vm, expression, value) {
-        expression = expression.trim();
-        let data = vm._data;
-        expression = expression.split('.');
-        expression.forEach((key, index) => {
-            if (index == expression.length - 1) {
-                data[key] = value;
-            } else {
-                data = data[key];
-            }
-        });
+      node.addEventListener(eventType[1], function (e) {
+        return fn.apply(vm, params);
+      }, false); //apply 参数是数组
     }
-}
+  },
+  _getVMVal: function _getVMVal(vm, expression) {
+    var value = vm;
 
-const cacheDiv = document.createElement('div');
+    expression = expression.trim();
+    expression = expression.split('.');
 
-const updater = {
-    textUpdater: function (node, value) {
-        node.textContent = typeof value === 'undefined' ? '' : value;
-    },
+    expression.forEach(function (key) {
+      if (value.hasOwnProperty(key)) {
+        value = value[key];
+      } else {
+        throw new Error("Can not find the property: " + key);
+      }
+    });
 
-    htmlUpdater: function (node, value) {
-        //当node为text节点时对应的流程（解析value到node里）
-        if (node.$parent) {
-            // {{{}}}html解析，传进来的node是一个空的fragment，得特殊处理
-            cacheDiv.innerHTML = value;
-            const childNodes = cacheDiv.childNodes,
-                doms = [];
-            let len = childNodes.length,
-                tempNode;
-            //html第一次更新进入的流程
-            if (node.$oncetime) {
-                while (len--) {
-                    tempNode = childNodes[0];
-                    node.appendChild(tempNode);
-                    doms.push(tempNode);
-                }
-                node.$doms = doms;
-                node.$oncetime = false;
-            } else {
-                // 在之后更新节点时进入的流程
-                let newFragment = document.createDocumentFragment();
-                while (len--) {
-                    tempNode = childNodes[0];
-                    newFragment.appendChild(tempNode);
-                    doms.push(tempNode);
-                }
-                // 插入新的节点
-                node.$parent.insertBefore(newFragment, node.$doms[0]);
-                // 删除原来的节点
-                node.$doms.forEach(childNode => {
-                    node.$parent.removeChild(childNode);
-                });
-                // 保存新节点引用，下次用来删除
-                node.$doms = doms;
-            }
+    if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
+      return JSON.stringify(value); // 对象的话这里给了 JSON 的字符串
+    } else {
+      return value;
+    }
+  },
+  _setVMVal: function _setVMVal(vm, expression, value) {
+    expression = expression.trim();
+    var data = vm._data; // 为啥不直接给 vm 上设置，只设置 vm._data 不是不能更新嘛
+    expression = expression.split('.');
+    expression.forEach(function (key, index) {
+      if (index === expression.length - 1) {
+        data[key] = value;
+      } else {
+        data = data[key];
+      }
+    });
+  }
+};
 
-        } else {
-            // v-html指令
-            node.innerHTML = typeof value === 'undefined' ? '' : value;
+var updater = {
+  textUpdater: function textUpdater(node, value) {
+    node.textContent = typeof value === 'undefined' ? '' : value;
+  },
+  htmlUpdater: function htmlUpdater(node, value) {
+    if (node.$parent) {
+      // 这里是 {{{}}} 进来的解析，node 是个空节点
+      var cacheDiv = document.createElement('div'); // 临时缓存节点，TODO: 为什么不用 fragment？试一下
+
+      cacheDiv.innerHTML = value;
+      var childNodes = cacheDiv.childNodes;
+      var doms = [];
+
+      var len = childNodes.length;
+      var tempNode = void 0;
+
+      if (node.$oncetime) {
+        // 这里是 第一次 初始化 html 的解析
+        while (len--) {
+          // 为了删除旧节点，记录 $doms
+          tempNode = childNodes[0];
+          node.appendChild(tempNode); // tempNode 此时已经从 childNodes 中转移到 node（删除了）
+          doms.push(tempNode);
         }
-    },
 
-    classUpdater: function (node, value, oldValue) {
-        var nodeNames = node.className;
-        if (oldValue) {
-            nodeNames = nodeNames.replace(oldValue, '').replace(/\s$/, '');
+        node.$doms = doms;
+        node.$oncetime = false;
+      } else {
+        // update 的 html 更新解析
+        var newFragment = document.createDocumentFragment();
+        while (len--) {
+          tempNode = childNodes[0];
+          newFragment.appendChild(tempNode);
+          doms.push(tempNode);
         }
-        var space = nodeNames && value ? ' ' : '';
-        node.className = nodeNames + space + value;
-    },
 
-    modelUpdater: function (node, value) {
-        node.value = typeof value === 'undefined' ? '' : value;
-    },
-}
+        node.$parent.insertBefore(newFragment, node.$doms[0]); // 这里唯一引用了 $dom
+        node.$doms.forEach(function (childNode) {
+          node.$parent.removeChild(childNode);
+        });
 
+        // 保存下次删除旧节点
+        node.$doms = doms;
+      }
+    } else {
+      // 这里是 v-html
+      node.innerHTML = typeof value === 'undefined' ? '' : value;
+    }
+  },
+  classUpdater: function classUpdater(node, value, oldValue) {
+    // className 修改，这里需要 oldValue
+    var nodeNames = node.className;
+    if (oldValue) {
+      nodeNames = nodeNames.replace(oldValue, '').replace(/\s$/, ''); // 删掉旧 value，清掉结尾空格
+    }
+    var space = nodeNames && value ? ' ' : '';
+    node.className = nodeNames + space + value;
+  },
+  modelUpdater: function modelUpdater(node, value) {
+    // 这里都是 form 表单元素
+    node.value = typeof value === 'undefined' ? '' : value;
+  }
+};
 
 /***/ }),
 /* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__watcher__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__observer__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__compiler__ = __webpack_require__(4);
 
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _watcher = __webpack_require__(0);
 
-class MVVM {
-    constructor (options) {
-        this.$options = options;
-        this._data = this.$options.data;
-        var self = this;
-        // 数据劫持(代理) vm.data.属性名称 => vm.属性名称 方便访问
-        Object.keys(this.$options.data).forEach(key => {
-            this._proxy(key);
-        });
-        //监听数据，给数据添加dep主题对象，在数据改变时通知订阅了该属性的watcher
-        __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__observer__["a" /* default */])(this._data);
-        //编译结点，解析各种指令，并且将每个node节点对应一个watcher身份，在收到通知时改变自身view视图
-        this.$compiler = new __WEBPACK_IMPORTED_MODULE_2__compiler__["a" /* default */](options.el || document.body, this);
+var _watcher2 = _interopRequireDefault(_watcher);
+
+var _observer = __webpack_require__(1);
+
+var _observer2 = _interopRequireDefault(_observer);
+
+var _compiler = __webpack_require__(4);
+
+var _compiler2 = _interopRequireDefault(_compiler);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var MVVM = function () {
+  function MVVM(options) {
+    var _this = this;
+
+    _classCallCheck(this, MVVM);
+
+    this.$options = options;
+    this._data = options.data;
+    // 将 vm 的数据关联到 vm._data 上
+    Object.keys(options.data).forEach(function (key) {
+      _this._proxy(key);
+    });
+
+    // 开始监听所有的数据
+    (0, _observer2.default)(this._data);
+
+    // 编译节点，添加 watcher
+    this.$compiler = new _compiler2.default(options.el || document.body, this); // body 是备选
+  }
+
+  _createClass(MVVM, [{
+    key: '$watch',
+    value: function $watch(expresstion, callback) {
+      new _watcher2.default(this, expresstion, callback);
     }
-
-    $watch (expression, callback) {
-        new __WEBPACK_IMPORTED_MODULE_0__watcher__["a" /* default */](this, expression, callback);
+  }, {
+    key: '_proxy',
+    value: function _proxy(key) {
+      Object.defineProperty(this, key, {
+        configurable: false, // 不可修改了
+        enumerable: true,
+        get: function get() {
+          return this._data[key];
+        },
+        set: function set(newValue) {
+          this._data[key] = newValue;
+        }
+      });
     }
+  }]);
 
-    _proxy (key) {
-        let self = this;
-        Object.defineProperty(this, key, {
-            configurable: false,
-            enumerable: true,
-            get() {
-                return self._data[key];
-            },
-            set(value) {
-                self._data[key] = value;
-            }
-        });
-    }
-}
+  return MVVM;
+}();
 
 window.MVVM = MVVM;
 
 /***/ }),
 /* 6 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__util__ = __webpack_require__(3);
 
 
-const arrayProto = Array.prototype;
-//劫持后的方法
-const arrayMethods = Object.create(arrayProto);
-/* harmony export (immutable) */ __webpack_exports__["a"] = arrayMethods;
-
-
-[
-  'push',
-  'pop',
-  'shift',
-  'unshift',
-  'splice',
-  'sort',
-  'reverse'
-].forEach(function(method) {
-    // 缓存一份原始方法
-    const original = arrayProto[method];
-    // 开始覆盖原始方法
-    __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__util__["a" /* def */])(arrayMethods, method, function() {
-        let i = arguments.length;
-        // const args = [].slice.call(arguments)
-        const args = new Array(i);
-        while(i--) {
-            args[i] = arguments[i];
-        }
-        //这里的this指向的是使用数组方法的数组
-        const result = original.apply(this, args);
-        //ob是每个数组对象对应的obeserver对象
-        const ob = this.__ob__;
-        let inserted;
-        console.log(this)
-        switch(method) {
-            case 'push':
-                inserted = args;
-                break;
-            case 'unshift':
-                inserted = args;
-                break;
-            case 'splice':
-                inserted = args.slice(2);
-                break;
-        }
-        //如果监听的data中的对象有push,unshift,splice等添加新值的方法，就监听新加入的数组
-        if (inserted) ob.observerArray(inserted);
-        //每次使用数组方法，都触发数组对象的dep发布事件
-        ob.dep.notify();
-        return result+this;
-    });
+Object.defineProperty(exports, "__esModule", {
+  value: true
 });
+exports.arrayMethods = undefined;
+
+var _util = __webpack_require__(3);
+
+// 简化原型
+var arrayProto = Array.prototype;
+
+// 继承至数组，待会覆盖方法
+var arrayMethods = exports.arrayMethods = Object.create(arrayProto);
+
+// 这里都是改变自身的方法
+['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'].forEach(function (method) {
+  // 这里要注意不要用 => 函数，保存 this 指向
+
+  var original = arrayProto[method]; // 缓存原始方法
+
+  // 覆盖原始方法
+  (0, _util.def)(arrayMethods, method, function () {
+    // 处理参数数组
+    var args = [].slice.call(arguments);
+
+    var result = original.apply(this, args); // this 为 data 数组
+    // 插入副作用
+    var ob = this.__ob__; // data 的 observer 对象，见 observer
+
+    // 取出添加的新值
+    var inserted = void 0;
+    switch (method) {
+      case 'push':
+        inserted = args;
+        break;
+      case 'unshift':
+        inserted = args;
+        break;
+      case 'splice':
+        inserted = args.slice(2);
+        break;
+    }
+
+    // 监听新值，如果是对象就有效果
+    inserted && ob.observerArray(inserted);
+
+    // 每次触发数组对象的 dep 发布事件
+    ob.dep.notify();
+
+    return result;
+  });
+});
+
+/**
+ 数组方法调用的副作用
+ ob.observerArray(newValue)
+ ob.dep.notify()
+ **/
 
 /***/ })
 /******/ ]);

@@ -1,3 +1,4 @@
+// 这里的 value 可能是 fn，数组的 fn
 export function def(obj, key, value, enumerable) {
     Object.defineProperty(obj, key, {
         value: value,

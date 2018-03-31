@@ -1,7 +1,7 @@
 import Dep from './dep';
 import { def } from './util';
 //arrayMethods是劫持了数组方法的对象
-import { arrayMethods } from './array';
+import { arrayMethods } from './array1';
 
 //原型继承
 function protoAugment(target, src) {
